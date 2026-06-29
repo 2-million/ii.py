@@ -1,8 +1,3 @@
-from ultralytics import YOLO
-model = YOLO('yolov8n.pt')  
+from ii.image_processing import app
 
-def main() -> None:
-    print("Hello, World!")
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": app.run(host='0.0.0.0', port=5555)

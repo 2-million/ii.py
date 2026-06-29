@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Контроль доступа животных</title>
+  </head>
+
+  <body>
+    <h1>Детекция домашних животных на диване</h1>
+
+    <form id="uploadForm">
+      <input type="file" id="imageInput" accept="image/*" />
+      <button type="button" onclick="processImage()">
+        Запустить обработку
+      </button>
+    </form>
+
+    <div id="result" style="display: none">
+      <h2>Результат:</h2>
+      <img id="resultImage" style="max-width: 100%" />
+      <div id="stats"></div>
+    </div>
+
+    <br />
+    <a href="/export/pdf">Скачать PDF отчет</a>
+
+    <script>
+      async function processImage() {
+        const file = document.getElementById("imageInput").files[0];
+        if (!file) {
+          alert("Выберите файл!");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const response = await fetch("/process", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        document.getElementById("resultImage").src =
+          "static/result.jpg?" + Date.now();
+        document.getElementById("result").style.display = "block";
+
+        let statsText = `Всего обнаружено объектов: ${data.count}\n`;
+        statsText += `Кошек: ${data.cats}\n`;
+        statsText += `Собак: ${data.dogs}\n`;
+        statsText += `Диванов: ${data.couches}\n`;
+
+        if (data.has_violation) {
+          statsText += `\nНАРУШЕНИЕ: животное на диване!!! (${data.violations} нарушений)`;
+        } else {
+          statsText += `\nНарушений нет, все ок!`;
+        }
+
+        document.getElementById("stats").innerText = statsText;
+      }
+    </script>
+  </body>
+</html>
